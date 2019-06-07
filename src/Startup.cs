@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ElectricHavoc.RazorBlazor.SideBySide.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,6 +33,13 @@ namespace ElectricHavoc.RazorBlazor.SideBySide
 
             services.AddRazorPages()
                 .AddNewtonsoftJson();
+
+            // Required to enable Blazor
+            services.AddServerSideBlazor();
+            // Required to capture location context
+            services.AddHttpContextAccessor();
+            // Required as part of blazor service demo
+            services.AddSingleton<WeatherForecastService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +68,10 @@ namespace ElectricHavoc.RazorBlazor.SideBySide
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                // Required to run Blazor
+                endpoints.MapBlazorHub();
+                // Required to execute Blazor page on direct navigation
+                endpoints.MapFallbackToPage("/Index");
             });
         }
     }

@@ -1,0 +1,32 @@
+﻿@using Microsoft.AspNetCore.Mvc.RazorPages
+@inject IJSRuntime js
+@inject Microsoft.AspNetCore.Components.IUriHelper uriHelper
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
+@inject Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider actions
+
+@functions
+{
+    protected override void OnInit()
+    {
+
+        // Most of the magic is here, it detects navigation, compared with Razor and forces refresh if not a Blazor page
+        // It would be nice if the framework would just do this detection for us
+        uriHelper.OnLocationChanged += (e, s) =>
+        {
+            var fullUrl = uriHelper.GetAbsoluteUri();
+            var baseUrl = uriHelper.GetBaseUri();
+            var navigate = fullUrl.Replace(baseUrl, "/");
+
+            var RazorRoutes = actions.ActionDescriptors.Items.OfType<PageActionDescriptor>().Select(s => s.ViewEnginePath).Distinct().Append("/");
+
+            if (RazorRoutes.Contains(navigate))
+            {
+                uriHelper.NavigateTo(navigate, true);
+            }
+            else
+            {
+                js.InvokeAsync<object>("eval", "document.getElementsByClassName('razorContent')[0].style.display='none';");
+            }
+        };
+    }
+}
